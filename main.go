@@ -4,8 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	"minitask1/internals/bio"
+	"minitask1/internals/checkout"
 	"minitask1/internals/circle"
 	insertnumber "minitask1/internals/insertNumber"
+	"minitask1/internals/person"
+	"minitask1/internals/reader"
 	"minitask1/internals/triangle"
 	"os"
 	"strconv"
@@ -21,6 +24,9 @@ func main() {
 		fmt.Println("4. Buat Segitiga '*'")
 		fmt.Println("5. Sisipkan Angka?")
 		fmt.Println("6. Buat Profile")
+		fmt.Println("7. Membaca Catatan")
+		fmt.Println("8. Buat Akun Person")
+		fmt.Println("9. Pembayaran")
 		fmt.Println("0. Keluar Aplikasi")
 
 		fmt.Print("pilih menu: ")
@@ -180,6 +186,125 @@ func main() {
 				fmt.Println("Riwayat:")
 				for key, value := range riwayat {
 					fmt.Printf("  %s: %s\n", key, value)
+				}
+			}
+		case "7":
+			fmt.Println("Membaca File")
+			fmt.Print("tekan 'enter' untuk membaca file: ")
+			scanner.Scan()
+			choice := scanner.Text()
+			choice = strings.TrimSpace(choice)
+			reader.ReaderFile()
+		case "8":
+			fmt.Println("Membuat Akun Person")
+
+			fmt.Print("Masukan nama: ")
+			scanner.Scan()
+			nama := strings.TrimSpace(scanner.Text())
+
+			fmt.Print("Masukan Alamat: ")
+			scanner.Scan()
+			alamat := strings.TrimSpace(scanner.Text())
+
+			fmt.Print("Masukan Nomor Telpon: ")
+			scanner.Scan()
+			phone := strings.TrimSpace(scanner.Text())
+
+			personData := person.NewPerson(nama, alamat, phone)
+			fmt.Println("Akun Person Anda:\n", personData.PrintPerson())
+
+			for {
+				fmt.Println("1. Tampilkan Salam")
+				fmt.Println("2. Ubah nama")
+				fmt.Println("0. Kembali")
+
+				fmt.Print("pilih menu: ")
+				scanner.Scan()
+				choice := scanner.Text()
+				choice = strings.ToLower(choice)
+
+				switch choice {
+				case "1":
+					fmt.Println(personData.GreetWithNamePerson())
+				case "2":
+					fmt.Print("Masukan nama baru: ")
+					scanner.Scan()
+					newName := strings.TrimSpace(scanner.Text())
+					personData.UpdateNamePerson(newName)
+				case "0":
+					return
+				default:
+					fmt.Println("Pilihan tidak valid")
+				}
+			}
+		case "9":
+			fmt.Println("==Pembayaran==")
+
+			var bills = []int{}
+
+			for {
+				fmt.Println("ketik 'selesai' untuk lanjut")
+				fmt.Print("Masukan harga barang: ")
+				scanner.Scan()
+				choice := strings.TrimSpace(scanner.Text())
+
+				if strings.ToLower(choice) == "selesai" {
+					if len(bills) == 0 {
+						fmt.Println("Belum ada barang yang ditambahkan")
+						continue
+					}
+					break
+				}
+
+				if choice == "" {
+					continue
+				}
+
+				choiceConv, err := strconv.Atoi(choice)
+				if err != nil {
+					fmt.Println("Input Tidak Valid. Harap masukkan angka.")
+					continue
+				}
+
+				if choiceConv <= 0 {
+					fmt.Println("Harga harus lebih dari 0")
+					continue
+				}
+
+				bills = append(bills, choiceConv)
+			}
+
+			for {
+				fmt.Println("Pilih metode pembayaran:")
+				fmt.Println("1. Online Payment")
+				fmt.Println("2. Bank Payment")
+				fmt.Println("3. Fiktif Payment")
+				fmt.Println("0. Keluar")
+
+				fmt.Print("Pilih metode: ")
+				scanner.Scan()
+				choice := strings.TrimSpace(strings.ToLower(scanner.Text()))
+
+				var paymentMethod checkout.ICheckout
+
+				switch choice {
+				case "1":
+					paymentMethod = checkout.OnlinePayment{}
+					paymentMethod.Payment(bills)
+					return
+				case "2":
+					paymentMethod = checkout.BankPayment{}
+					paymentMethod.Payment(bills)
+					return
+				case "3":
+					paymentMethod = checkout.FictifPayment{}
+					paymentMethod.Payment(bills)
+					return
+				case "0":
+					return
+				default:
+					fmt.Println("Pilihan tidak valid")
+					continue
 				}
 			}
 		case "0":
