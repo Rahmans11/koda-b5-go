@@ -10,6 +10,7 @@ import (
 	"minitask1/internals/person"
 	"minitask1/internals/reader"
 	"minitask1/internals/triangle"
+	workroutine "minitask1/internals/workRoutine"
 	"os"
 	"strconv"
 	"strings"
@@ -27,6 +28,7 @@ func main() {
 		fmt.Println("7. Membaca Catatan")
 		fmt.Println("8. Buat Akun Person")
 		fmt.Println("9. Pembayaran")
+		fmt.Println("10. Simulasi Bekerja")
 		fmt.Println("0. Keluar Aplikasi")
 
 		fmt.Print("pilih menu: ")
@@ -307,6 +309,13 @@ func main() {
 					continue
 				}
 			}
+		case "10":
+			fmt.Println("Simulasi Berankat Kerja")
+			fmt.Print("tekan 'enter' untuk memulai Simulasi: ")
+			scanner.Scan()
+			choice := scanner.Text()
+			choice = strings.TrimSpace(choice)
+			workroutine.WorkRoutine()
 		case "0":
 			fmt.Println("Keluar dari aplikasi, sampai jumpa 🫡")
 			return
