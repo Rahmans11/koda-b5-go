@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"minitask1/internals/bio"
+	blackboardchan "minitask1/internals/blackboardChan"
 	"minitask1/internals/checkout"
 	"minitask1/internals/circle"
 	insertnumber "minitask1/internals/insertNumber"
@@ -14,6 +15,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 func main() {
@@ -29,6 +31,7 @@ func main() {
 		fmt.Println("8. Buat Akun Person")
 		fmt.Println("9. Pembayaran")
 		fmt.Println("10. Simulasi Bekerja")
+		fmt.Println("11. BlackBoard")
 		fmt.Println("0. Keluar Aplikasi")
 
 		fmt.Print("pilih menu: ")
@@ -316,6 +319,59 @@ func main() {
 			choice := scanner.Text()
 			choice = strings.TrimSpace(choice)
 			workroutine.WorkRoutine()
+		case "11":
+			fmt.Println("Black Board...")
+
+			boxMessageChan := make(chan blackboardchan.Message)
+
+			var messages []blackboardchan.Message
+
+			fmt.Println("Masukan Pesan (ketik 'selesai' untuk berhenti):")
+			for {
+				fmt.Print("Masukan Nama Pengirim: ")
+				scanner.Scan()
+				sender := strings.TrimSpace(scanner.Text())
+
+				if strings.ToLower(sender) == "selesai" {
+					break
+				}
+
+				if sender == "" {
+					continue
+				}
+
+				fmt.Print("Masukan Pesan: ")
+				scanner.Scan()
+				content := strings.TrimSpace(scanner.Text())
+
+				if content != "" {
+					messages = append(messages, blackboardchan.NewMessage(sender, content))
+				}
+			}
+			fmt.Print("Masukan jumlah pengiriman: ")
+			scanner.Scan()
+			amountStr := strings.TrimSpace(scanner.Text())
+			amount, err := strconv.Atoi(amountStr)
+			if err != nil {
+				fmt.Println("invalid input")
+				continue
+			}
+
+			var wg sync.WaitGroup
+
+			go func() {
+				defer close(boxMessageChan)
+				defer fmt.Println("Pengiriman Selesai")
+				for i := 1; i <= amount; i++ {
+					wg.Add(1)
+					go blackboardchan.Blackboard(&wg, boxMessageChan)
+					for _, msg := range messages {
+						blackboardchan.MsgSender(boxMessageChan, msg)
+					}
+				}
+			}()
+			fmt.Println("Mulai mengirim pesan")
+			wg.Wait()
 		case "0":
 			fmt.Println("Keluar dari aplikasi, sampai jumpa 🫡")
 			return
